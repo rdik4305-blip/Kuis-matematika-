@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis & Top Global</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen p-4 flex justify-center">
+
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-6 rounded-3xl w-full max-w-sm text-center">
+            <h3 id="modal-title" class="text-xl font-bold mb-4">Informasi</h3>
+            <p id="modal-text" class="text-slate-600 mb-6"></p>
+            <button onclick="closeModal()" class="w-full bg-slate-800 text-white p-3 rounded-xl font-bold">Tutup</button>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl shadow-xl w-full max-w-md">
+        
+        <div class="flex items-center space-x-4 mb-6 bg-slate-100 p-4 rounded-2xl">
+            <div class="relative">
+                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User" class="w-16 h-16 rounded-full border-2 border-white shadow-md object-cover" alt="Avatar">
+                <div id="verified-badge-profile" class="hidden absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-1 border-2 border-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </div>
+            </div>
+            <div class="flex-grow">
+                <h2 id="display-name" class="font-bold text-lg">Nama Pengguna</h2>
+                <div class="text-xs text-slate-600">Followers: <span id="follower-count" class="font-bold text-slate-800">0</span></div>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-slate-500">Saldo</p>
+                <div class="text-green-600 font-bold text-lg">$ <span id="money">0</span></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mb-6">
+            <button onclick="showHelp()" class="bg-blue-100 text-blue-700 py-3 rounded-lg text-xs font-bold">🎧 Pusat Bantuan</button>
+            <button onclick="checkEvent()" class="bg-orange-100 text-orange-700 py-3 rounded-lg text-xs font-bold">🎁 Event Hadiah</button>
+        </div>
+
+        <div class="mb-6 grid grid-cols-1 gap-2 border-t pt-4">
+            <input type="text" id="edit-name" placeholder="Ganti Nama..." class="p-2 border rounded-lg text-sm">
+            <label class="bg-blue-100 text-blue-700 p-2 rounded-lg text-sm font-bold text-center cursor-pointer">
+                Pilih Foto Profil
+                <input type="file" id="upload-avatar" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+            </label>
+            <button onclick="saveProfile()" class="bg-slate-800 text-white p-2 rounded-lg text-sm font-bold">Simpan Perubahan</button>
+            
+            <div class="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                <h4 class="font-bold text-blue-800 text-xs mb-2">Ajukan Centang Biru ($500)</h4>
+                <input type="text" id="v-name" placeholder="Nama Asli..." class="w-full p-2 mb-1 text-xs border rounded">
+                <input type="number" id="v-age" placeholder="Umur..." class="w-full p-2 mb-1 text-xs border rounded">
+                <input type="text" id="v-link" placeholder="Link Sosmed..." class="w-full p-2 mb-2 text-xs border rounded">
+                <button onclick="submitVerification()" class="w-full bg-blue-600 text-white p-2 rounded-lg text-xs font-bold">Kirim Pengajuan</button>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="font-bold text-slate-700 mb-2">🛒 Toko Follower</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="buyFollowers(10, 100)" class="bg-indigo-600 text-white p-2 rounded-lg text-xs font-bold">100 F ($10)</button>
+                <button onclick="buyFollowers(50, 600)" class="bg-indigo-600 text-white p-2 rounded-lg text-xs font-bold">600 F ($50)</button>
+                <button onclick="buyFollowers(150, 2000)" class="bg-indigo-600 text-white p-2 rounded-lg text-xs font-bold">2.000 F ($150)</button>
+                <button onclick="buyFollowers(300, 5000)" class="bg-indigo-600 text-white p-2 rounded-lg text-xs font-bold">5.000 F ($300)</button>
+                <button onclick="buyFollowers(500, 10000)" class="bg-indigo-600 text-white p-2 rounded-lg text-xs font-bold">10.000 F ($500)</button>
+                <button onclick="buyFollowers(2000, 50000)" class="bg-indigo-600 text-white p-2 rounded-lg text-xs font-bold">50.000 F ($2000)</button>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="font-bold text-slate-700 mb-2">🔥 Top 200 Global</h3>
+            <div id="leaderboard" class="space-y-2 text-sm h-48 overflow-y-auto bg-slate-50 p-2 rounded-xl border"></div>
+        </div>
+
+        <h1 class="text-2xl font-bold text-slate-800 mb-2">Kuis Matematika</h1>
+        <div id="quiz-container">
+            <div id="question" class="text-3xl font-extrabold text-blue-600 mb-4 py-4 bg-slate-50 rounded-xl text-center">?</div>
+            <input type="number" id="answer" placeholder="Jawaban..." class="w-full p-3 border-2 rounded-xl mb-2 text-center">
+            <button onclick="checkAnswer()" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700">Kirim Jawaban</button>
+        </div>
+
+        <div id="feedback" class="mt-3 p-2 rounded-xl hidden text-center font-bold"></div>
+        <button onclick="resetAccount()" class="mt-6 w-full text-xs text-red-400 underline">Reset Data</button>
+    </div>
+
+    <script>
+        let name = localStorage.getItem('userName') || "Pengguna";
+        let avatar = localStorage.getItem('userAvatar') || "https://ui-avatars.com/api/?name=User";
+        let followers = parseInt(localStorage.getItem('userFollowers')) || 0;
+        let money = parseInt(localStorage.getItem('userMoney')) || 0;
+        let quizCount = parseInt(localStorage.getItem('quizCount')) || 0;
+        let isVerified = localStorage.getItem('isVerified') === 'true';
+
+        // Pre-generating global rivals
+        const globalRivals = Array.from({length: 200}, (_, i) => ({
+            name: `Pemain ${200 - i}`,
+            avatar: `https://ui-avatars.com/api/?name=Pemain+${200-i}`,
+            followers: Math.floor(Math.random() * 50000) + 1000,
+            isVerified: false
+        }));
+
+        function showModal(title, text) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-text').innerText = text;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+        function showHelp() {
+            showModal("Bantuan CS", "1. Jawab kuis untuk dapat $5.\n2. Beli follower di Toko untuk naik peringkat.\n3. Dapatkan centang biru jika kamu nomor 1 atau membeli verifikasi!");
+        }
+
+        function checkEvent() {
+            if (quizCount >= 10) {
+                money += 50; quizCount = 0;
+                showModal("Event Berhasil!", "Selamat! Kamu dapat bonus $50!");
+                saveAll();
+            } else {
+                showModal("Event Aktif", `Selesaikan ${10 - quizCount} soal lagi untuk dapat bonus $50!`);
+            }
+        }
+
+        function submitVerification() {
+            const vName = document.getElementById('v-name').value;
+            const vAge = document.getElementById('v-age').value;
+            const vLink = document.getElementById('v-link').value;
+
+            if(!vName || !vAge || !vLink) { showModal("Gagal", "Isi semua data verifikasi!"); return; }
+            if(isVerified) { showModal("Info", "Kamu sudah terverifikasi!"); return; }
+            
+            if(money >= 500) {
+                money -= 500;
+                isVerified = true;
+                showModal("Berhasil!", "Selamat! Dokumen diterima, akunmu kini terverifikasi.");
+                saveAll();
+            } else {
+                showModal("Gagal", "Dolar tidak cukup untuk biaya verifikasi ($500)!");
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('display-name').innerText = name;
+            document.getElementById('user-avatar').src = avatar;
+            document.getElementById('money').innerText = money;
+            document.getElementById('follower-count').innerText = followers;
+            
+            const sorted = [...globalRivals, { name: name, avatar: avatar, followers: followers, isVerified: isVerified }].sort((a,b) => b.followers - a.followers);
+            const userIndex = sorted.findIndex(p => p.name === name);
+            
+            // Auto-verify if Rank 1
+            if (userIndex === 0 && !isVerified) { isVerified = true; saveAll(); }
+            
+            document.getElementById('verified-badge-profile').classList.toggle('hidden', !isVerified);
+            
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.innerHTML = sorted.map((p, index) => `
+                <div class="flex items-center justify-between ${p.name === name ? 'bg-yellow-200' : ''} px-2 py-1 rounded">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] w-4">${index + 1}</span>
+                        <img src="${p.avatar}" class="w-6 h-6 rounded-full object-cover">
+                        <span class="font-medium truncate w-20">${p.name}</span>
+                        ${(index === 0 || p.isVerified) ? '<span class="text-blue-500 font-bold">✓</span>' : ''}
+                    </div>
+                    <span class="font-bold text-indigo-700">${p.followers.toLocaleString()} f</span>
+                </div>
+            `).join('');
+        }
+
+        function saveAll() {
+            localStorage.setItem('userName', name);
+            localStorage.setItem('userAvatar', avatar);
+            localStorage.setItem('userFollowers', followers);
+            localStorage.setItem('userMoney', money);
+            localStorage.setItem('quizCount', quizCount);
+            localStorage.setItem('isVerified', isVerified);
+            updateUI();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => { avatar = e.target.result; saveAll(); };
+            reader.readAsDataURL(file);
+        }
+
+        function saveProfile() {
+            const inputName = document.getElementById('edit-name');
+            if(inputName.value.trim() !== "") { name = inputName.value.trim(); saveAll(); inputName.value = ""; }
+        }
+
+        function buyFollowers(price, amount) {
+            if (money >= price) { money -= price; followers += amount; saveAll(); }
+            else { showModal("Gagal", "Dolar tidak cukup!"); }
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('answer');
+            const answerValue = parseInt(input.value);
+            const correctAnswer = parseInt(localStorage.getItem('quizCurrentAnswer'));
+            if (!isNaN(answerValue) && answerValue === correctAnswer) {
+                money += 5; quizCount++;
+                document.getElementById('feedback').innerText = "Benar! +$5";
+                document.getElementById('feedback').className = "mt-3 p-2 rounded-xl block bg-green-100 text-green-700 text-center font-bold";
+                generateQuestion();
+            } else {
+                document.getElementById('feedback').innerText = "Salah!";
+                document.getElementById('feedback').className = "mt-3 p-2 rounded-xl block bg-red-100 text-red-700 text-center font-bold";
+            }
+            saveAll();
+        }
+
+        function generateQuestion() {
+            const a = Math.floor(Math.random() * 20) + 1;
+            const b = Math.floor(Math.random() * 20) + 1;
+            localStorage.setItem('quizCurrentAnswer', a + b);
+            document.getElementById('question').innerText = `${a} + ${b} = ?`;
+        }
+
+        function resetAccount() {
+            if(confirm("Yakin hapus semua data?")) { localStorage.clear(); location.reload(); }
+        }
+
+        // Initialize App
+        updateUI();
+        if(!localStorage.getItem('quizCurrentAnswer')) generateQuestion();
+        else document.getElementById('question').innerText = "Lanjutkan kuis!";
+    </script>
+</body>
+</html>
